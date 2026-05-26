@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.5)
+
+project(IOMessage_server LANGUAGES C)
+
+if(PLATFORM STREQUAL "WIN")
+    add_library(NetworkManager STATIC src/win/NetworkManager_win_imp.c ./NetworkManager.h)
+    add_library(ThreadManager STATIC src/win/ThreadManager_win_imp.c ./ThreadManager.h)
+elseif(PLATFORM STREQUAL "LINUX")
+    message(FATAL_ERROR "LINUX still unsupported")
+else()
+    message(FATAL_ERROR "platform unsupported (WIN or LINUX)")
+endif()
+
+add_library(CommunicationManager STATIC src/CommunicationManager.c ./CommunicationManager.h)
+add_library(request STATIC src/request.c ./request.h)
+add_library(response STATIC src/response.c ./response.h)
+add_library(shared_queue STATIC src/shared_queue.c ./shared_queue.h)
+add_library(utils STATIC src/utils.c ./utils.h)
+add_library(arena STATIC src/arena.c ./arena.h)
+
+add_executable(IOMessage_server src/main.c)
+target_link_libraries(IOMessage_server PRIVATE NetworkManager ThreadManager utils shared_queue response request arena CommunicationManager)
+if(PLATFORM STREQUAL "WIN")
+    target_link_libraries(IOMessage_server PRIVATE ws2_32)
+endif()
